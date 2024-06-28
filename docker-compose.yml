@@ -1,0 +1,49 @@
+version: '3'
+
+services:
+  app1:
+    <<: &app_template
+      container_name: app1
+      entrypoint: dockerize -wait tcp://db:3306 -timeout 120s node index.js
+      build: 
+        context: node
+      image: ismaelvirtuoso/fullcycle-nginx-nodejs
+      networks:
+        - node-network
+      volumes:
+        - ./node:/usr/src/app
+      depends_on:
+        - db
+  app2:
+    <<: *app_template
+    container_name: app2
+
+  nginx:
+    container_name: nginx
+    image: nginx:latest
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf
+    ports:
+      - "80:80"
+    depends_on:
+      - app1
+      - app2
+    networks:
+      - node-network
+
+  db:
+    image: mysql:5.7
+    command: --innodb-use-native-aio=0
+    container_name: db
+    restart: always
+    volumes:
+      - ./mysql:/var/lib/mysql
+    environment:
+      - MYSQL_DATABASE=nodedb
+      - MYSQL_ROOT_PASSWORD=root
+    networks:
+      - node-network
+
+networks:
+  node-network:
+    driver: bridge
