@@ -3,6 +3,7 @@ FROM node:22 AS builder
 WORKDIR /usr/src/app
 
 COPY package*.json ./
+COPY start.sh ./
 
 RUN npm install
 
