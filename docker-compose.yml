@@ -4,7 +4,7 @@ services:
   app1:
     <<: &app_template
       container_name: app1
-      entrypoint: dockerize -wait tcp://db:3306 -timeout 120s node index.js
+      entrypoint: ["bash", "-c", "/usr/src/app/start.sh"]
       build: 
         context: node
       image: ismaelvirtuoso/fullcycle-nginx-nodejs
@@ -38,6 +38,7 @@ services:
     restart: always
     volumes:
       - ./mysql:/var/lib/mysql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
     environment:
       - MYSQL_DATABASE=nodedb
       - MYSQL_ROOT_PASSWORD=root
